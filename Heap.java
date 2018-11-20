@@ -5,25 +5,23 @@ import java.util.ArrayList;
 public class Heap<T> {
     private int size;
     private ArrayList<Integer> heapKeyArray = new ArrayList<>();
-    private static final int MINUS_INFINITY = -10000000;
-    private static final int INFINITY = 10000000;
+    private static final int MINUS_INFINITY = -(int) Math.pow(2, 32) - 1;
+    private static final int INFINITY = (int) Math.pow(2, 32);
     private ArrayList<T> heapObjectList = new ArrayList<>();
 
-    public Heap(ArrayList arrayList) {
+    public Heap(ArrayList<Integer> arrayList) {
         heapKeyArray.add(null);
         heapKeyArray.addAll(arrayList);
-        heapObjectList.add(null);
-        heapObjectList.addAll(arrayList);
         this.size = arrayList.size();
     }
 
-    public Heap(ArrayList keyList, ArrayList<T> objectList) {
+    public Heap(ArrayList<Integer> keyList, ArrayList<T> objectList) {
         heapKeyArray.add(null);
         heapKeyArray.addAll(keyList);
-        if(keyList.size() != objectList.size()){
+        if (keyList.size() != objectList.size()) {
+            log("Error: keyList size != objectList size. Assign key to object ");
             heapObjectList.add(null);
-            heapObjectList.addAll(keyList);
-        }else {
+        } else {
             heapObjectList.add(null);
             heapObjectList.addAll(objectList);
             this.size = keyList.size();
@@ -85,17 +83,18 @@ public class Heap<T> {
             largest = left;
         }
 
-        if (right <= size && heapKeyArray.get(largest) < heapKeyArray.get(right) ) {
+        if (right <= size && heapKeyArray.get(largest) < heapKeyArray.get(right)) {
             largest = right;
         }
 
         if (largest != rootIndex) {
             swap(heapKeyArray, rootIndex, largest);
+            swapObject(heapObjectList, rootIndex, largest);
             doMaxHeapifying(largest);
         }
     }
 
-    public void buildMinHeap(){
+    public void buildMinHeap() {
         size = heapKeyArray.size() - 1;
         for (int i = (int) Math.floor(size / 2); i >= 1; i--) {
             doMinHeapifying(i);
@@ -109,68 +108,94 @@ public class Heap<T> {
         }
     }
 
-    public void doMinHeapSorting(){
-        buildMaxHeap();
-        for (int i = heapKeyArray.size()-1; i >= 2; i--) {
+    public void doMinHeapSorting() {
+        buildMinHeap();
+        for (int i = heapKeyArray.size() - 1; i >= 2; i--) {
             swap(heapKeyArray, i, 1);
+            swapObject(heapObjectList, i, 1);
             size--;
             doMinHeapifying(1);
         }
+        size = heapKeyArray.size()-1;
     }
 
     public void doMaxHeapSorting() {
         buildMaxHeap();
-        for (int i = heapKeyArray.size()-1; i >= 2; i--) {
+        for (int i = heapKeyArray.size() - 1; i >= 2; i--) {
             swap(heapKeyArray, i, 1);
+            swapObject(heapObjectList, i, 1);
             size--;
             doMaxHeapifying(1);
         }
     }
 
-    public void insertKeyToMinHeap(int newKey){
+    // TODO
+    public void insertKeyToMinHeap(int newKey) {
         heapKeyArray.add(INFINITY);
         size++;
         increaseKeyValue(size, newKey);
     }
 
-    public void insertKeyToMaxHeap(int newKey){
+    // TODO
+    public void insertKeyToMinHeap(int newKey, T object) {
+        heapKeyArray.add(INFINITY);
+        heapObjectList.add(object);
+        size++;
+        decreaseKeyValue(size, newKey);
+    }
+
+    // TODO
+    public void insertKeyToMaxHeap(int newKey) {
         heapKeyArray.add(MINUS_INFINITY);
         size++;
         increaseKeyValue(size, newKey);
     }
 
-    public void decreaseKeyValue(int index, int newKey){
-        if(newKey < heapKeyArray.get(index)){
+    // TODO
+    public void insertKeyToMaxHeap(int newKey, T object) {
+        heapKeyArray.add(MINUS_INFINITY);
+        heapObjectList.add(object);
+        size++;
+        increaseKeyValue(size, newKey);
+    }
+
+    // TODO
+    public void decreaseKeyValue(int index, int newKey) {
+        if (newKey > heapKeyArray.get(index)) {
             log("Error: New key is larger than current key");
             return;
         }
 
         heapKeyArray.set(index, newKey);
+        log("index: " + index);
         int i = index;
-        while ( i > 1 && heapKeyArray.get(getParentIndex(i)) < heapKeyArray.get(i)){
+        while (i > 1 && heapKeyArray.get(getParentIndex(i)) > heapKeyArray.get(i)) {
             swap(heapKeyArray, getParentIndex(i), i);
+            swapObject(heapObjectList, getParentIndex(i), i);
             i = getParentIndex(i);
         }
     }
 
-    public void increaseKeyValue(int index, int newKey){
-        if(newKey < heapKeyArray.get(index)){
+    // TODO
+    public void increaseKeyValue(int index, int newKey) {
+        if (newKey < heapKeyArray.get(index)) {
             log("Error: New key is smaller than current key");
             return;
         }
 
         heapKeyArray.set(index, newKey);
         int i = index;
-        while ( i > 1 && heapKeyArray.get(getParentIndex(i)) < heapKeyArray.get(i)){
+        while (i > 1 && heapKeyArray.get(getParentIndex(i)) < heapKeyArray.get(i)) {
             swap(heapKeyArray, getParentIndex(i), i);
+            swapObject(heapObjectList, getParentIndex(i), i);
             i = getParentIndex(i);
         }
     }
 
-    public int extractMin(){
-        if(size < 1){
+    public int extractMin() {
+        if (size < 1) {
             log("Error: heap underflow");
-            return -1;
+            return MINUS_INFINITY;
         }
 
         int min = heapKeyArray.get(1);
@@ -181,37 +206,37 @@ public class Heap<T> {
         return min;
     }
 
-    public T extractMinObject(){
-        if(size < 1){
+    public T extractMinObject() {
+        if (size < 1) {
             log("Error: heap underflow");
             return null;
         }
 
         T minObject = heapObjectList.get(1);
         heapObjectList.set(1, heapObjectList.get(size));
-        heapObjectList.set(size, null);
+        heapObjectList.remove(size);
         heapKeyArray.set(1, heapKeyArray.get(size));
-        heapKeyArray.set(size, -1);
+        heapKeyArray.remove(size);
         size--;
         doMinHeapifying(1);
         return minObject;
     }
 
-    public int extractMax(){
-        if(size < 1){
+    public int extractMax() {
+        if (size < 1) {
             log("Error: heap underflow");
             return -1;
         }
 
         int max = heapKeyArray.get(1);
         heapKeyArray.set(1, heapKeyArray.get(size));
-        heapKeyArray.set(size, -1);
+        heapKeyArray.set(size, MINUS_INFINITY);
         size--;
         doMaxHeapifying(1);
         return max;
     }
 
-    public int getMaximum(){
+    public int getMaximum() {
         return heapKeyArray.get(1);
     }
 
@@ -219,8 +244,12 @@ public class Heap<T> {
         return heapKeyArray;
     }
 
-    public ArrayList<T> getHeapObjectArray(){
+    public ArrayList<T> getHeapObjectArray() {
         return heapObjectList;
+    }
+
+    public int size(){
+        return size;
     }
 
     private void swap(ArrayList<Integer> arrayList, int index1, int index2) {
@@ -232,7 +261,7 @@ public class Heap<T> {
         arrayList.set(index2, element1);
     }
 
-    private void swapObject(ArrayList<T> arrayList, int index1, int index2){
+    private void swapObject(ArrayList<T> arrayList, int index1, int index2) {
         if (index1 > arrayList.size() || index2 > arrayList.size()) {
             return;
         }
@@ -250,3 +279,4 @@ public class Heap<T> {
     }
 
 }
+// git commit -m 'Rev.2 Fixed some bugs for insertKeyToMinHeap and doMinHeapSorting'
