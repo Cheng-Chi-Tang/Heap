@@ -29,6 +29,48 @@ public class Heap<T> {
 
     // endregion attributes
 
+    // region common private functions
+
+    private int getParentIndex(int index) {
+        return (int) Math.ceil(index / 2);
+    }
+
+    private int getLeftIndex(int index) {
+        return 2 * index;
+    }
+
+    private int getRightIndex(int index) {
+        return 2 * index + 1;
+    }
+
+    private void swap(ArrayList<Integer> arrayList, int index1, int index2) {
+        if (index1 > heapKeyArray.size() || index2 > heapKeyArray.size()) {
+            return;
+        }
+        int element1 = arrayList.get(index1);
+        arrayList.set(index1, arrayList.get(index2));
+        arrayList.set(index2, element1);
+    }
+
+    private void swapObject(ArrayList<T> arrayList, int index1, int index2) {
+        if (index1 > arrayList.size() || index2 > arrayList.size()) {
+            return;
+        }
+        T element1 = arrayList.get(index1);
+        arrayList.set(index1, arrayList.get(index2));
+        arrayList.set(index2, element1);
+    }
+
+    private void log(String args) {
+        System.out.println(args);
+    }
+
+    private void log(int args) {
+        System.out.println(args);
+    }
+
+    // endregion common private functions
+
     // region constructors
 
 
@@ -113,7 +155,7 @@ public class Heap<T> {
     public void insertKeyToMinHeap(int newKey) {
         heapKeyArray.add(INFINITY);
         size++;
-        increaseKeyValue(size, newKey);
+        decreaseKeyValue(size, newKey);
     }
 
     public void insertKeyToMinHeap(int newKey, T object) {
@@ -138,6 +180,11 @@ public class Heap<T> {
         }
     }
 
+    /**
+     * Returns the smallest value and maintain this minimum heap
+     *
+     * @return the smallest value
+     */
     public int extractMin() {
         if (size < 1) {
             log("Error: heap underflow");
@@ -152,6 +199,11 @@ public class Heap<T> {
         return min;
     }
 
+    /**
+     * Returns the object with the smallest key value and maintain this minimum heap
+     *
+     * @return the object with the smallest key value
+     */
     public T extractMinObject() {
         if (size < 1) {
             log("Error: heap underflow");
@@ -281,47 +333,5 @@ public class Heap<T> {
     }
 
     // endregion getters
-
-    // region common private functions
-
-    private int getParentIndex(int index) {
-        return (int) Math.ceil(index / 2);
-    }
-
-    private int getLeftIndex(int index) {
-        return 2 * index;
-    }
-
-    private int getRightIndex(int index) {
-        return 2 * index + 1;
-    }
-
-    private void swap(ArrayList<Integer> arrayList, int index1, int index2) {
-        if (index1 > heapKeyArray.size() || index2 > heapKeyArray.size()) {
-            return;
-        }
-        int element1 = arrayList.get(index1);
-        arrayList.set(index1, arrayList.get(index2));
-        arrayList.set(index2, element1);
-    }
-
-    private void swapObject(ArrayList<T> arrayList, int index1, int index2) {
-        if (index1 > arrayList.size() || index2 > arrayList.size()) {
-            return;
-        }
-        T element1 = arrayList.get(index1);
-        arrayList.set(index1, arrayList.get(index2));
-        arrayList.set(index2, element1);
-    }
-
-    private void log(String args) {
-        System.out.println(args);
-    }
-
-    private void log(int args) {
-        System.out.println(args);
-    }
-
-    // endregion common private functions
 
 }
